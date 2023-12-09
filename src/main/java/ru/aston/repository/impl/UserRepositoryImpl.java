@@ -1,64 +1,69 @@
-package ru.aston.repository;
+package ru.aston.repository.impl;
 
 import ru.aston.entity.User;
+import ru.aston.repository.UserRepository;
 import ru.aston.util.ConnectionManager;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserRepositories {
+public class UserRepositoryImpl implements UserRepository {
 
+    @Override
     public User createUser(User user) {
         String sqlQuery = "INSERT INTO users(name, login) VALUES(?, ?);";
 
-        long id = 0;
-
         try (Connection connection = ConnectionManager.open();
              PreparedStatement stmt = connection.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS)) {
-
             stmt.setString(1, user.getName());
             stmt.setString(2, user.getLogin());
 
             int affectedRows = stmt.executeUpdate();
-
             if (affectedRows <= 0) {
                 throw new RuntimeException("User doesn't create.");
             }
             ResultSet result = stmt.getGeneratedKeys();
             if (result.next()) {
-                id = result.getLong(1);
+                long id = result.getLong(1);
                 user.setId(id);
             }
-        } catch (Exception ex) {
-            throw new RuntimeException(ex.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
-
         return user;
     }
 
-    public User findUserById(long id) {
-        String sqlQuery = "SELECT * FROM users WHERE user_id=?;";
+    @Override
+    public User findUserById(long userId) {
+        String sqlQuery = "SELECT * FROM users WHERE user_id = ?;";
+
         try (Connection connection = ConnectionManager.open();
-             PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
-            preparedStatement.setLong(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
+             PreparedStatement stmt = connection.prepareStatement(sqlQuery)) {
+            stmt.setLong(1, userId);
+            ResultSet resultSet = stmt.executeQuery();
 
             if (!resultSet.next()) {
-                throw new RuntimeException("NOT FIND USER");
+                throw new RuntimeException("USER NOT FIND");
             }
             return map(resultSet);
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
+    @Override
     public List<User> findAllUsers() {
         String sqlQuery = "SELECT * FROM users;";
+
         try (Connection connection = ConnectionManager.open();
-             PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
-            ResultSet resultSet = preparedStatement.executeQuery();
+             PreparedStatement stmt = connection.prepareStatement(sqlQuery)) {
+            ResultSet resultSet = stmt.executeQuery();
             List<User> users = new ArrayList<>();
 
             while (resultSet.next()) {
@@ -67,19 +72,16 @@ public class UserRepositories {
             return users;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
+    @Override
     public User updateUser(User user) {
+        String sqlQuery = "UPDATE users SET name = ?, login = ? WHERE user_id = ?;";
 
-        String sqlQuery = "UPDATE users SET name=?, login=? WHERE user_id=?;";
-
-        long id = 0;
-
-        try (Connection connect = ConnectionManager.open();
-             PreparedStatement stmt = connect.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS)) {
-
+        try (Connection connection = ConnectionManager.open();
+             PreparedStatement stmt = connection.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, user.getName());
             stmt.setString(2, user.getLogin());
             stmt.setLong(3, user.getId());
@@ -89,38 +91,40 @@ public class UserRepositories {
             if (affectedRows <= 0) {
                 throw new RuntimeException("User doesn't update.");
             }
+
             ResultSet result = stmt.getGeneratedKeys();
             if (result.next()) {
-                id = result.getLong(1);
+                long id = result.getLong(1);
                 user.setId(id);
                 return user;
             }
-        } catch (Exception ex) {
-            throw new RuntimeException(ex.getMessage());
-        }
 
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
         return user;
     }
 
-    public void deleteUserById(Long userId) {
-        String sqlQuery = "DELETE FROM users WHERE user_id=?;";
+    @Override
+    public void deleteUserById(long userId) {
+        String sqlQuery = "DELETE FROM users WHERE user_id = ?;";
 
-        try (Connection connect = ConnectionManager.open();
-             PreparedStatement stmt = connect.prepareStatement(sqlQuery)) {
-
+        try (Connection connection = ConnectionManager.open();
+             PreparedStatement stmt = connection.prepareStatement(sqlQuery)) {
             stmt.setLong(1, userId);
+
             int affectedRows = stmt.executeUpdate();
 
             if (affectedRows <= 0) {
                 throw new RuntimeException("User doesn't delete.");
             }
 
-        } catch (Exception ex) {
-            throw new RuntimeException(ex.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 
-    public User map(ResultSet resultSet) throws SQLException {
+    private User map(ResultSet resultSet) throws SQLException {
         return User.builder()
                 .id(resultSet.getLong("user_id"))
                 .name(resultSet.getString("name"))

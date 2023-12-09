@@ -4,12 +4,12 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public final class ConnectionManager {
+import static ru.aston.util.Constants.DRIVER_KEY;
+import static ru.aston.util.Constants.PASSWORD_KEY;
+import static ru.aston.util.Constants.URL_KEY;
+import static ru.aston.util.Constants.USERNAME_KEY;
 
-    private static final String URL_KEY = "db.url";
-    private static final String USERNAME_KEY = "db.username";
-    private static final String PASSWORD_KEY = "db.password";
-    private static final String DRIVER_KEY = "db.driverClassName";
+public final class ConnectionManager {
 
     static {
         loadDriver();
@@ -20,9 +20,6 @@ public final class ConnectionManager {
 
     public static Connection open() {
         try {
-            System.out.println(PropertiesLoader.getProperty(URL_KEY) +
-                    PropertiesLoader.getProperty(USERNAME_KEY) +
-                    PropertiesLoader.getProperty(PASSWORD_KEY));
             return DriverManager.getConnection(
                     PropertiesLoader.getProperty(URL_KEY),
                     PropertiesLoader.getProperty(USERNAME_KEY),
