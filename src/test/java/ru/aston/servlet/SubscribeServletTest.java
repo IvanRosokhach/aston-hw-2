@@ -1,6 +1,5 @@
 package ru.aston.servlet;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,7 +39,6 @@ class SubscribeServletTest {
 
     @Test
     void doGet() throws IOException {
-        String json = getNewUserJson();
         UserDto dto = getUserDto();
         StringWriter writer = new StringWriter();
 
@@ -50,11 +48,9 @@ class SubscribeServletTest {
 
         servlet.doGet(req, response);
 
-//        Mockito.when(req.getReader()).thenReturn(getReader(json));
         verify(response).setStatus(HttpServletResponse.SC_OK);
         verify(service).getSubscribers(anyLong());
         assertEquals(mapper.writeValueAsString(List.of(dto)), writer.toString());
-
     }
 
     @Test
@@ -83,7 +79,6 @@ class SubscribeServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
         verify(service).remove(anyLong(), anyLong());
-
     }
 
     private UserDto getUserDto() {
@@ -92,15 +87,6 @@ class SubscribeServletTest {
                 .name("TestName")
                 .login("TestLogin")
                 .build();
-    }
-
-    private String getNewUserJson() throws JsonProcessingException {
-        UserDto userDto = UserDto.builder()
-                .name("TestName")
-                .login("TestLogin")
-                .build();
-
-        return mapper.writeValueAsString(userDto);
     }
 
 }

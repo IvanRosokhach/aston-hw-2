@@ -26,15 +26,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-//@ExtendWith(MockitoExtension.class)
 class UserServletTest {
 
-    //    @Mock
     private HttpServletRequest req;
-    //    @Mock
     private HttpServletResponse response;
     private UserServlet servlet;
-    //    @Mock
     private UserService service;
     private ObjectMapper mapper;
 
@@ -47,7 +43,6 @@ class UserServletTest {
         service = mock(UserServiceImpl.class);
         mapper = new ObjectMapper();
         servlet = new UserServlet(service, mapper);
-//        servlet = new UserServlet(service);
     }
 
     @Test
@@ -60,9 +55,7 @@ class UserServletTest {
         when(service.create(any(UserDto.class))).thenReturn(dto);
         when(response.getWriter()).thenReturn(new PrintWriter(writer));
 
-
         servlet.doPost(req, response);
-
 
         verify(response).setStatus(HttpServletResponse.SC_CREATED);
         verify(service).create(mapper.readValue(json, UserDto.class));
@@ -78,17 +71,10 @@ class UserServletTest {
         when(service.findAll()).thenReturn(List.of(dto));
         when(response.getWriter()).thenReturn(new PrintWriter(writer));
 
-
-//        Mockito.when(req.getParameter("id")).thenReturn(dto.getId().toString());
-//        Mockito.when(response.getWriter()).thenReturn(new PrintWriter(writer));
-//        Mockito.when(service.findById(ArgumentMatchers.anyLong())).thenReturn(dto);
-
         servlet.doGet(req, response);
-
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
         assertEquals(mapper.writeValueAsString(List.of(dto)), writer.toString());
-
     }
 
     @Test
@@ -98,11 +84,8 @@ class UserServletTest {
 
         when(req.getQueryString()).thenReturn("id=1");
         when(req.getParameter("id")).thenReturn("1");
-//        Mockito.when(req.getParameter("firstName")).thenReturn(dto.getFirstName());
-//        Mockito.when(req.getParameter("lastName")).thenReturn(dto.getLastName());
         when(service.findById(anyLong())).thenReturn(dto);
         when(response.getWriter()).thenReturn(new PrintWriter(writer));
-//        Mockito.when(service.findByName(dto.getFirstName(), dto.getLastName())).thenReturn(List.of(dto));
 
         servlet.doGet(req, response);
 
@@ -127,7 +110,6 @@ class UserServletTest {
 
     @Test
     void removeUser() throws IOException {
-//        UserDto dto = getUserDto();
         StringWriter writer = new StringWriter();
         when(req.getParameter("id")).thenReturn("1");
         when(service.deleteById(anyLong())).thenReturn(true);

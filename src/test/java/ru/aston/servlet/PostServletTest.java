@@ -44,7 +44,6 @@ class PostServletTest {
 
     @Test
     void doGet_whenParameterAuthorIdExist_thenOk() throws IOException {
-        String json = getNewPostJson();
         PostDto dto = getPostDto();
         StringWriter writer = new StringWriter();
 
@@ -55,7 +54,6 @@ class PostServletTest {
 
         servlet.doGet(req, response);
 
-//        Mockito.when(req.getReader()).thenReturn(getReader(json));
         verify(response).setStatus(HttpServletResponse.SC_OK);
         verify(service).findByAuthorId(anyLong());
         assertEquals(mapper.writeValueAsString(List.of(dto)), writer.toString());
@@ -63,7 +61,6 @@ class PostServletTest {
 
     @Test
     void doGet_whenParameterIdExist_thenOk() throws IOException {
-        String json = getNewPostJson();
         PostDto dto = getPostDto();
         StringWriter writer = new StringWriter();
 
@@ -74,7 +71,6 @@ class PostServletTest {
 
         servlet.doGet(req, response);
 
-//        Mockito.when(req.getReader()).thenReturn(getReader(json));
         verify(response).setStatus(HttpServletResponse.SC_OK);
         verify(service).findById(anyLong());
         assertEquals(mapper.writeValueAsString(dto), writer.toString());
