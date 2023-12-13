@@ -5,10 +5,7 @@ import ru.aston.entity.Post;
 
 public class PostMapper {
 
-    private PostMapper() {
-    }
-
-    public static Post toPost(PostDto postDto) {
+    public Post fromDto(PostDto postDto) {
         return Post.builder()
                 .id(postDto.getId())
                 .text(postDto.getText())
@@ -16,7 +13,7 @@ public class PostMapper {
                 .build();
     }
 
-    public static PostDto toPostDto(Post post) {
+    public PostDto toDto(Post post) {
         return PostDto.builder()
                 .id(post.getId())
                 .text(post.getText())

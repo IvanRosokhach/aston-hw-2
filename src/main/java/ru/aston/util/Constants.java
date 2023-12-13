@@ -11,8 +11,8 @@ public class Constants {
     public static final String DRIVER_KEY = "db.driverClassName";
 
     public static final String TEST_URL_KEY = "test.db.url";
-    public static final String TEST_USERNAME_KEY = "db.username";
-    public static final String TEST_PASSWORD_KEY = "db.password";
-    public static final String TEST_DRIVER_KEY = "db.driverClassName";
+    public static final String TEST_USERNAME_KEY = "test.db.username";
+    public static final String TEST_PASSWORD_KEY = "test.db.password";
+    public static final String TEST_DRIVER_KEY = "test.db.driverClassName";
 
 }

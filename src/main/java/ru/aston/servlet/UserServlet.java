@@ -15,17 +15,28 @@ import java.util.List;
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static jakarta.servlet.http.HttpServletResponse.SC_CREATED;
 import static jakarta.servlet.http.HttpServletResponse.SC_OK;
+import static ru.aston.util.ServletUtil.ERROR_PARAMETER_ID;
+import static ru.aston.util.ServletUtil.createResponse;
 
 @WebServlet("/user")
 public class UserServlet extends HttpServlet {
 
-    UserService userService = new UserServiceImpl();
-    ObjectMapper mapper = new ObjectMapper();
+    private final UserService userService;
+    private final ObjectMapper mapper;
+
+    public UserServlet() {
+        this.userService = new UserServiceImpl();
+        this.mapper = new ObjectMapper();
+    }
+
+    public UserServlet(UserService userService, ObjectMapper objectMapper) {
+        this.userService = userService;
+        this.mapper = objectMapper;
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String pathInfo = req.getQueryString();
-
         if (pathInfo == null || pathInfo.isEmpty()) {
             List<UserDto> allUsers = userService.findAll();
 
@@ -34,59 +45,50 @@ public class UserServlet extends HttpServlet {
 
         } else {
             String userId = req.getParameter("id");
-            if (userId.isEmpty()) {
-                throw new RuntimeException("An empty value cannot be passed.");
+            if (!userId.isEmpty()) {
+                long id = Long.parseLong(userId);
+                UserDto userById = userService.findById(id);
+
+                String json = mapper.writeValueAsString(userById);
+                createResponse(resp, json, SC_OK);
+            } else {
+                createResponse(resp, ERROR_PARAMETER_ID, SC_BAD_REQUEST);
             }
-
-            long id = Long.parseLong(userId);
-            UserDto userById = userService.findById(id);
-
-            String json = mapper.writeValueAsString(userById);
-            createResponse(resp, json, SC_OK);
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         UserDto convertedUser = mapper.readValue(req.getReader(), UserDto.class);
-        UserDto user = userService.create(convertedUser);
+        UserDto userDto = userService.create(convertedUser);
 
-        String json = mapper.writeValueAsString(user);
+        String json = mapper.writeValueAsString(userDto);
         createResponse(resp, json, SC_CREATED);
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        UserDto convertedUser = mapper.readValue(req.getInputStream(), UserDto.class);
+        UserDto convertedUser = mapper.readValue(req.getReader(), UserDto.class);
 
-        UserDto userDTO = userService.update(convertedUser);
+        UserDto userDto = userService.update(convertedUser);
 
-        String json = mapper.writeValueAsString(userDTO);
+        String json = mapper.writeValueAsString(userDto);
         createResponse(resp, json, SC_OK);
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String path = req.getQueryString();
-        if (path != null) {
-            String idString = path.substring(3);
-
-            try {
-                int userId = Integer.parseInt(idString);
-                userService.delete(userId);
-                createResponse(resp, "User delete done.", SC_OK);
-
-            } catch (NumberFormatException e) {
-                createResponse(resp, "Path should contain id=numbers.", SC_BAD_REQUEST);
-            }
+        String id = req.getParameter("id");
+        if (id == null) {
+            createResponse(resp, ERROR_PARAMETER_ID, SC_BAD_REQUEST);
         }
-    }
 
-    private static void createResponse(HttpServletResponse resp, String body, int status) throws IOException {
-        resp.setContentType("application/json");
-        resp.setCharacterEncoding("UTF-8");
-        resp.setStatus(status);
-        resp.getWriter().print(body);
+        long userId = Long.parseLong(id);
+        if (userService.deleteById(userId)) {
+            createResponse(resp, "User successfully deleted.", SC_OK);
+        } else {
+            createResponse(resp, "User for delete not found.", SC_BAD_REQUEST);
+        }
     }
 
 }

@@ -8,8 +8,8 @@ public interface SubscriptionService {
 
     List<UserDto> getSubscribers(long userId);
 
-    void add(long userId, long authorId);
+    boolean add(long userId, long authorId);
 
-    void remove(long userId, long authorId);
+    boolean remove(long userId, long authorId);
 
 }

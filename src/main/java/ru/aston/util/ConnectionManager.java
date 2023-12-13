@@ -18,7 +18,7 @@ public final class ConnectionManager {
     private ConnectionManager() {
     }
 
-    public static Connection open() {
+    public static Connection getConnection() {
         try {
             return DriverManager.getConnection(
                     PropertiesLoader.getProperty(URL_KEY),

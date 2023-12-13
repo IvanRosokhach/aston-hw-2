@@ -15,7 +15,7 @@ services:
       - db.password=root
 
   db:
-    image: postgres:13.7-alpine
+    image: postgres:13-buster
     container_name: app-db-container
     ports:
       - "5432:5432"

@@ -1,6 +1,7 @@
 package ru.aston.repository.impl;
 
 import ru.aston.entity.Post;
+import ru.aston.exception.RepositoryException;
 import ru.aston.repository.PostRepository;
 import ru.aston.util.ConnectionManager;
 
@@ -14,20 +15,23 @@ import java.util.List;
 
 public class PostRepositoryImpl implements PostRepository {
 
+    public static final String CREATE_SQL_QUERY = "INSERT INTO posts(text, author_id) VALUES(?, ?);";
+    public static final String FIND_BY_ID_SQL_QUERY = "SELECT * FROM posts WHERE post_id = ?;";
+    public static final String FIND_BY_AUTHOR_ID_SQL_QUERY = "SELECT * FROM posts WHERE author_id = ?";
+    public static final String DELETE_BY_ID_SQL_QUERY = "DELETE FROM posts WHERE post_id = ?;";
+
     @Override
     public Post create(Post post) {
-        String sqlQuery = "INSERT INTO posts(text, author_id) VALUES(?, ?);";
-
-        try (Connection connection = ConnectionManager.open();
-             PreparedStatement stmt = connection.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = ConnectionManager.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(CREATE_SQL_QUERY, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, post.getText());
             stmt.setLong(2, post.getAuthorId());
 
             int affectedRows = stmt.executeUpdate();
-
             if (affectedRows <= 0) {
-                throw new RuntimeException("Post doesn't create.");
+                throw new RepositoryException("Post doesn't create.");
             }
+
             ResultSet result = stmt.getGeneratedKeys();
             if (result.next()) {
                 long id = result.getLong(1);
@@ -41,15 +45,13 @@ public class PostRepositoryImpl implements PostRepository {
 
     @Override
     public Post findById(long postId) {
-        String sqlQuery = "SELECT * FROM posts WHERE post_id = ?;";
-
-        try (Connection connection = ConnectionManager.open();
-             PreparedStatement stmt = connection.prepareStatement(sqlQuery)) {
+        try (Connection connection = ConnectionManager.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(FIND_BY_ID_SQL_QUERY)) {
             stmt.setLong(1, postId);
             ResultSet resultSet = stmt.executeQuery();
 
             if (!resultSet.next()) {
-                throw new RuntimeException("POST NOT FIND.");
+                throw new RepositoryException("POST NOT FIND.");
             }
             return map(resultSet);
 
@@ -60,36 +62,31 @@ public class PostRepositoryImpl implements PostRepository {
 
     @Override
     public List<Post> findByAuthorId(long authorId) {
-        String sqlQuery = "SELECT * FROM posts WHERE author_id = ?";
-
         List<Post> list = new ArrayList<>();
-        try (Connection connection = ConnectionManager.open();
-             PreparedStatement stmt = connection.prepareStatement(sqlQuery)) {
+        try (Connection connection = ConnectionManager.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(FIND_BY_AUTHOR_ID_SQL_QUERY)) {
             stmt.setLong(1, authorId);
 
             ResultSet resultSet = stmt.executeQuery();
             while (resultSet.next()) {
                 list.add(map(resultSet));
             }
+            return list;
+
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage());
         }
-        return list;
     }
 
     @Override
-    public void deleteById(long postId) {
-        String sqlQuery = "DELETE FROM posts WHERE post_id = ?;";
-
-        try (Connection connect = ConnectionManager.open();
-             PreparedStatement stmt = connect.prepareStatement(sqlQuery)) {
+    public boolean deleteById(long postId) {
+        try (Connection connect = ConnectionManager.getConnection();
+             PreparedStatement stmt = connect.prepareStatement(DELETE_BY_ID_SQL_QUERY)) {
             stmt.setLong(1, postId);
 
             int affectedRows = stmt.executeUpdate();
+            return affectedRows > 0;
 
-            if (affectedRows <= 0) {
-                throw new RuntimeException("Post doesn't delete.");
-            }
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage());
         }

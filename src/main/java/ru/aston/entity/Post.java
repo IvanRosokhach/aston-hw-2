@@ -6,9 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class Post {
-
     long id;
     String text;
     long authorId;
-
 }

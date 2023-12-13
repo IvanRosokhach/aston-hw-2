@@ -4,14 +4,8 @@ import ru.aston.entity.Post;
 
 import java.util.List;
 
-public interface PostRepository {
-
-    Post create(Post post);
-
-    Post findById(long postId);
+public interface PostRepository extends BaseRepository<Post> {
 
     List<Post> findByAuthorId(long authorId);
-
-    void deleteById(long postId);
 
 }

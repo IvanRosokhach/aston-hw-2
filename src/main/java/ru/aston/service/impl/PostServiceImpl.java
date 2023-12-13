@@ -11,29 +11,40 @@ import java.util.List;
 
 public class PostServiceImpl implements PostService {
 
-    PostRepository postRepository = new PostRepositoryImpl();
+    private final PostRepository postRepository;
+    private final PostMapper mapper;
+
+    public PostServiceImpl() {
+        this.postRepository = new PostRepositoryImpl();
+        this.mapper = new PostMapper();
+    }
+
+    public PostServiceImpl(PostRepository postRepository, PostMapper mapper) {
+        this.postRepository = postRepository;
+        this.mapper = mapper;
+    }
 
     @Override
     public PostDto create(PostDto postDto) {
-        Post post = postRepository.create(PostMapper.toPost(postDto));
-        return PostMapper.toPostDto(post);
+        Post post = postRepository.create(mapper.fromDto(postDto));
+        return mapper.toDto(post);
     }
 
     @Override
     public PostDto findById(long postId) {
         Post post = postRepository.findById(postId);
-        return PostMapper.toPostDto(post);
+        return mapper.toDto(post);
     }
 
     @Override
     public List<PostDto> findByAuthorId(long authorId) {
         List<Post> posts = postRepository.findByAuthorId(authorId);
-        return posts.stream().map(PostMapper::toPostDto).toList();
+        return posts.stream().map(mapper::toDto).toList();
     }
 
     @Override
-    public void delete(long postId) {
-        postRepository.deleteById(postId);
+    public boolean deleteById(long postId) {
+        return postRepository.deleteById(postId);
     }
 
 }

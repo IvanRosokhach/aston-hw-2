@@ -13,39 +13,36 @@ import java.util.List;
 
 public class SubscriptionRepositoryImpl implements SubscriptionRepository {
 
-    @Override
-    public void add(long userId, long authorId) {
-        String sqlQuery = "INSERT INTO subscriptions(user_id1, user_id2) VALUES(?, ?);";
+    public static final String ADD_SQL_QUERY = "INSERT INTO subscriptions(user_id1, user_id2) VALUES(?, ?);";
+    public static final String REMOVE_SQL_QUERY = "DELETE FROM subscriptions WHERE user_id1 = ? AND user_id2 = ?;";
+    public static final String GET_SQL_QUERY = "SELECT * FROM users WHERE user_id IN (" +
+            "SELECT user_id1 FROM subscriptions WHERE user_id2 = ?);";
 
-        try (Connection connection = ConnectionManager.open();
-             PreparedStatement stmt = connection.prepareStatement(sqlQuery)) {
+    @Override
+    public boolean add(long userId, long authorId) {
+        try (Connection connection = ConnectionManager.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(ADD_SQL_QUERY)) {
             stmt.setLong(1, userId);
             stmt.setLong(2, authorId);
 
             int affectedRows = stmt.executeUpdate();
+            return affectedRows > 0;
 
-            if (affectedRows <= 0) {
-                throw new RuntimeException("Subscriptions doesn't create.");
-            }
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
     }
 
     @Override
-    public void remove(long userId, long authorId) {
-        String sqlQuery = "DELETE FROM subscriptions WHERE user_id1 = ? AND user_id2 = ?;";
-
-        try (Connection connection = ConnectionManager.open();
-             PreparedStatement stmt = connection.prepareStatement(sqlQuery)) {
+    public boolean remove(long userId, long authorId) {
+        try (Connection connection = ConnectionManager.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(REMOVE_SQL_QUERY)) {
             stmt.setLong(1, userId);
             stmt.setLong(2, authorId);
 
             int affectedRows = stmt.executeUpdate();
+            return affectedRows > 0;
 
-            if (affectedRows <= 0) {
-                throw new RuntimeException("Subscriptions doesn't delete.");
-            }
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -53,11 +50,8 @@ public class SubscriptionRepositoryImpl implements SubscriptionRepository {
 
     @Override
     public List<User> getSubscribers(long userId) {
-        String sqlQuery = "SELECT * FROM users WHERE user_id IN(" +
-                "SELECT user_id1 FROM subscriptions WHERE user_id2 = ?);";
-
-        try (Connection connection = ConnectionManager.open();
-             PreparedStatement stmt = connection.prepareStatement(sqlQuery)) {
+        try (Connection connection = ConnectionManager.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(GET_SQL_QUERY)) {
             stmt.setLong(1, userId);
 
             ResultSet resultSet = stmt.executeQuery();

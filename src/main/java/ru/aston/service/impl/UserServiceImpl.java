@@ -11,35 +11,46 @@ import java.util.List;
 
 public class UserServiceImpl implements UserService {
 
-    UserRepository userRepository = new UserRepositoryImpl();
+    private final UserRepository userRepository;
+    private final UserMapper mapper;
+
+    public UserServiceImpl() {
+        this.userRepository = new UserRepositoryImpl();
+        this.mapper = new UserMapper();
+    }
+
+    public UserServiceImpl(UserRepository userRepository, UserMapper mapper) {
+        this.userRepository = userRepository;
+        this.mapper = mapper;
+    }
 
     @Override
     public UserDto create(UserDto userDto) {
-        User user = userRepository.createUser(UserMapper.toUser(userDto));
-        return UserMapper.toUserDto(user);
+        User user = userRepository.create(mapper.fromDto(userDto));
+        return mapper.toDto(user);
     }
 
     @Override
     public UserDto findById(long userId) {
-        User user = userRepository.findUserById(userId);
-        return UserMapper.toUserDto(user);
+        User user = userRepository.findById(userId);
+        return mapper.toDto(user);
     }
 
     @Override
     public List<UserDto> findAll() {
-        List<User> users = userRepository.findAllUsers();
-        return users.stream().map(UserMapper::toUserDto).toList();
+        List<User> users = userRepository.findAll();
+        return users.stream().map(mapper::toDto).toList();
     }
 
     @Override
     public UserDto update(UserDto userDto) {
-        User user = userRepository.updateUser(UserMapper.toUser(userDto));
-        return UserMapper.toUserDto(user);
+        User user = userRepository.update(mapper.fromDto(userDto));
+        return mapper.toDto(user);
     }
 
     @Override
-    public void delete(long userId) {
-        userRepository.deleteUserById(userId);
+    public boolean deleteById(long userId) {
+        return userRepository.deleteById(userId);
     }
 
 }

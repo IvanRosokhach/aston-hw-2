@@ -4,16 +4,10 @@ import ru.aston.entity.User;
 
 import java.util.List;
 
-public interface UserRepository {
+public interface UserRepository extends BaseRepository<User> {
 
-    User createUser(User user);
+    List<User> findAll();
 
-    User findUserById(long userId);
-
-    List<User> findAllUsers();
-
-    User updateUser(User user);
-
-    void deleteUserById(long userId);
+    User update(User user);
 
 }

@@ -15,12 +15,25 @@ import java.util.List;
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static jakarta.servlet.http.HttpServletResponse.SC_CREATED;
 import static jakarta.servlet.http.HttpServletResponse.SC_OK;
+import static ru.aston.util.ServletUtil.ERROR_PARAMETER_ID;
+import static ru.aston.util.ServletUtil.ERROR_PARAMETER_ID_OR_AUTHOR_ID;
+import static ru.aston.util.ServletUtil.createResponse;
 
 @WebServlet("/post")
 public class PostServlet extends HttpServlet {
 
-    PostService postService = new PostServiceImpl();
-    ObjectMapper mapper = new ObjectMapper();
+    private final PostService postService;
+    private final ObjectMapper mapper;
+
+    public PostServlet() {
+        this.postService = new PostServiceImpl();
+        this.mapper = new ObjectMapper();
+    }
+
+    public PostServlet(PostService postService, ObjectMapper mapper) {
+        this.postService = postService;
+        this.mapper = mapper;
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -40,8 +53,9 @@ public class PostServlet extends HttpServlet {
 
             String json = mapper.writeValueAsString(postById);
             createResponse(resp, json, SC_OK);
+
         } else {
-            throw new RuntimeException("An empty or two value cannot be passed.");
+            createResponse(resp, ERROR_PARAMETER_ID_OR_AUTHOR_ID, SC_BAD_REQUEST);
         }
     }
 
@@ -56,26 +70,17 @@ public class PostServlet extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String path = req.getQueryString();
-        if (path != null) {
-            String idString = path.substring(3);
-
-            try {
-                int postId = Integer.parseInt(idString);
-                postService.delete(postId);
-                createResponse(resp, "Post delete done.", SC_OK);
-
-            } catch (NumberFormatException e) {
-                createResponse(resp, "Path should contain id=numbers.", SC_BAD_REQUEST);
-            }
+        String id = req.getParameter("id");
+        if (id == null) {
+            createResponse(resp, ERROR_PARAMETER_ID, SC_BAD_REQUEST);
         }
-    }
 
-    private static void createResponse(HttpServletResponse resp, String body, int status) throws IOException {
-        resp.setContentType("application/json");
-        resp.setCharacterEncoding("UTF-8");
-        resp.setStatus(status);
-        resp.getWriter().print(body);
+        long postId = Long.parseLong(id);
+        if (postService.deleteById(postId)) {
+            createResponse(resp, "Post successfully deleted.", SC_OK);
+        } else {
+            createResponse(resp, "Post for delete not found.", SC_BAD_REQUEST);
+        }
     }
 
 }

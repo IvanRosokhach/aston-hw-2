@@ -5,10 +5,7 @@ import ru.aston.entity.User;
 
 public class UserMapper {
 
-    private UserMapper() {
-    }
-
-    public static User toUser(UserDto userDto) {
+    public User fromDto(UserDto userDto) {
         return User.builder()
                 .id(userDto.getId())
                 .name(userDto.getName())
@@ -16,7 +13,7 @@ public class UserMapper {
                 .build();
     }
 
-    public static UserDto toUserDto(User user) {
+    public UserDto toDto(User user) {
         return UserDto.builder()
                 .id(user.getId())
                 .name(user.getName())

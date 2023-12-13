@@ -11,22 +11,33 @@ import java.util.List;
 
 public class SubscriptionServiceImpl implements SubscriptionService {
 
-    SubscriptionRepository subscriptionRepository = new SubscriptionRepositoryImpl();
+    private final SubscriptionRepository subscriptionRepository;
+    private final UserMapper mapper;
+
+    public SubscriptionServiceImpl() {
+        this.subscriptionRepository = new SubscriptionRepositoryImpl();
+        this.mapper = new UserMapper();
+    }
+
+    public SubscriptionServiceImpl(SubscriptionRepository subscriptionRepository, UserMapper mapper) {
+        this.subscriptionRepository = subscriptionRepository;
+        this.mapper = mapper;
+    }
 
     @Override
     public List<UserDto> getSubscribers(long userId) {
         List<User> subscribers = subscriptionRepository.getSubscribers(userId);
-        return subscribers.stream().map(UserMapper::toUserDto).toList();
+        return subscribers.stream().map(mapper::toDto).toList();
     }
 
     @Override
-    public void add(long userId, long authorId) {
-        subscriptionRepository.add(userId, authorId);
+    public boolean add(long userId, long authorId) {
+        return subscriptionRepository.add(userId, authorId);
     }
 
     @Override
-    public void remove(long userId, long authorId) {
-        subscriptionRepository.remove(userId, authorId);
+    public boolean remove(long userId, long authorId) {
+        return subscriptionRepository.remove(userId, authorId);
     }
 
 }
