@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+
+  server:
+    build: .
+    image: app-image
+    container_name: app-container
+    ports:
+      - "8888:8080"
+    depends_on:
+      - db
+    environment:
+      - db.url=jdbc:postgresql://db:5432/aston-db
+      - db.username=root
+      - db.password=root
+
+  db:
+    image: postgres:alpine
+    container_name: app-db-container
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=db
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
