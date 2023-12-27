@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static ru.aston.TestObjectsBuilder.getUserDto;
 
 class UserServiceTest {
 
@@ -78,14 +79,6 @@ class UserServiceTest {
         when(repository.deleteById(anyLong())).thenReturn(true);
 
         assertTrue(service.deleteById(1));
-    }
-
-    private UserDto getUserDto() {
-        return UserDto.builder()
-                .id(1)
-                .name("TestName")
-                .login("TestLogin")
-                .build();
     }
 
 }

@@ -19,6 +19,9 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static ru.aston.TestObjectsBuilder.getUserDto;
+import static ru.aston.util.ServletUtil.AUTHOR_ID;
+import static ru.aston.util.ServletUtil.ID;
 
 class SubscribeServletTest {
 
@@ -42,7 +45,7 @@ class SubscribeServletTest {
         UserDto dto = getUserDto();
         StringWriter writer = new StringWriter();
 
-        when(req.getParameter("id")).thenReturn("1");
+        when(req.getParameter(ID)).thenReturn("1");
         when(service.getSubscribers(anyLong())).thenReturn(List.of(dto));
         when(response.getWriter()).thenReturn(new PrintWriter(writer));
 
@@ -56,8 +59,9 @@ class SubscribeServletTest {
     @Test
     void doPost() throws IOException {
         StringWriter writer = new StringWriter();
-        when(req.getParameter("id")).thenReturn("1");
-        when(req.getParameter("author-id")).thenReturn("2");
+
+        when(req.getParameter(ID)).thenReturn("1");
+        when(req.getParameter(AUTHOR_ID)).thenReturn("2");
         when(service.add(anyLong(), anyLong())).thenReturn(true);
         when(response.getWriter()).thenReturn(new PrintWriter(writer));
 
@@ -70,8 +74,9 @@ class SubscribeServletTest {
     @Test
     void doDelete() throws IOException {
         StringWriter writer = new StringWriter();
-        when(req.getParameter("id")).thenReturn("1");
-        when(req.getParameter("author-id")).thenReturn("2");
+
+        when(req.getParameter(ID)).thenReturn("1");
+        when(req.getParameter(AUTHOR_ID)).thenReturn("2");
         when(service.remove(anyLong(), anyLong())).thenReturn(true);
         when(response.getWriter()).thenReturn(new PrintWriter(writer));
 
@@ -79,14 +84,6 @@ class SubscribeServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
         verify(service).remove(anyLong(), anyLong());
-    }
-
-    private UserDto getUserDto() {
-        return UserDto.builder()
-                .id(1)
-                .name("TestName")
-                .login("TestLogin")
-                .build();
     }
 
 }

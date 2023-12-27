@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import ru.aston.dto.UserDto;
 import ru.aston.service.UserService;
 import ru.aston.service.impl.UserServiceImpl;
@@ -16,8 +17,10 @@ import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static jakarta.servlet.http.HttpServletResponse.SC_CREATED;
 import static jakarta.servlet.http.HttpServletResponse.SC_OK;
 import static ru.aston.util.ServletUtil.ERROR_PARAMETER_ID;
+import static ru.aston.util.ServletUtil.ID;
 import static ru.aston.util.ServletUtil.createResponse;
 
+@AllArgsConstructor
 @WebServlet("/user")
 public class UserServlet extends HttpServlet {
 
@@ -27,11 +30,6 @@ public class UserServlet extends HttpServlet {
     public UserServlet() {
         this.userService = new UserServiceImpl();
         this.mapper = new ObjectMapper();
-    }
-
-    public UserServlet(UserService userService, ObjectMapper objectMapper) {
-        this.userService = userService;
-        this.mapper = objectMapper;
     }
 
     @Override
@@ -44,7 +42,7 @@ public class UserServlet extends HttpServlet {
             createResponse(resp, json, SC_OK);
 
         } else {
-            String userId = req.getParameter("id");
+            String userId = req.getParameter(ID);
             if (!userId.isEmpty()) {
                 long id = Long.parseLong(userId);
                 UserDto userById = userService.findById(id);
@@ -78,8 +76,8 @@ public class UserServlet extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String id = req.getParameter("id");
-        if (id == null) {
+        String id = req.getParameter(ID);
+        if (id == null || id.isEmpty()) {
             createResponse(resp, ERROR_PARAMETER_ID, SC_BAD_REQUEST);
         }
 

@@ -1,5 +1,6 @@
 package ru.aston.service.impl;
 
+import lombok.AllArgsConstructor;
 import ru.aston.dto.UserDto;
 import ru.aston.entity.User;
 import ru.aston.mapper.UserMapper;
@@ -9,6 +10,7 @@ import ru.aston.service.UserService;
 
 import java.util.List;
 
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -17,11 +19,6 @@ public class UserServiceImpl implements UserService {
     public UserServiceImpl() {
         this.userRepository = new UserRepositoryImpl();
         this.mapper = new UserMapper();
-    }
-
-    public UserServiceImpl(UserRepository userRepository, UserMapper mapper) {
-        this.userRepository = userRepository;
-        this.mapper = mapper;
     }
 
     @Override

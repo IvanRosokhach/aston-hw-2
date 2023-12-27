@@ -8,6 +8,4 @@ public interface UserService extends BaseService<UserDto> {
 
     List<UserDto> findAll();
 
-    UserDto update(UserDto userDto);
-
 }

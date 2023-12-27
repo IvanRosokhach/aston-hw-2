@@ -1,5 +1,6 @@
 package ru.aston.service.impl;
 
+import lombok.AllArgsConstructor;
 import ru.aston.dto.PostDto;
 import ru.aston.entity.Post;
 import ru.aston.mapper.PostMapper;
@@ -9,6 +10,7 @@ import ru.aston.service.PostService;
 
 import java.util.List;
 
+@AllArgsConstructor
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
@@ -17,11 +19,6 @@ public class PostServiceImpl implements PostService {
     public PostServiceImpl() {
         this.postRepository = new PostRepositoryImpl();
         this.mapper = new PostMapper();
-    }
-
-    public PostServiceImpl(PostRepository postRepository, PostMapper mapper) {
-        this.postRepository = postRepository;
-        this.mapper = mapper;
     }
 
     @Override
@@ -40,6 +37,12 @@ public class PostServiceImpl implements PostService {
     public List<PostDto> findByAuthorId(long authorId) {
         List<Post> posts = postRepository.findByAuthorId(authorId);
         return posts.stream().map(mapper::toDto).toList();
+    }
+
+    @Override
+    public PostDto update(PostDto postDto) {
+        Post post = postRepository.update(mapper.fromDto(postDto));
+        return mapper.toDto(post);
     }
 
     @Override

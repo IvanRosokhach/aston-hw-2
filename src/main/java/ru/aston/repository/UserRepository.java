@@ -8,6 +8,4 @@ public interface UserRepository extends BaseRepository<User> {
 
     List<User> findAll();
 
-    User update(User user);
-
 }

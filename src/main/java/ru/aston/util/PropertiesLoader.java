@@ -1,18 +1,24 @@
 package ru.aston.util;
 
+import lombok.experimental.UtilityClass;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+@UtilityClass
 public final class PropertiesLoader {
+
+    public static final String URL_KEY = "db.url";
+    public static final String USERNAME_KEY = "db.username";
+    public static final String PASSWORD_KEY = "db.password";
+    public static final String DRIVER_KEY = "db.driverClassName";
+    public static final String TEST_URL_KEY = "test.db.url";
 
     private static final Properties PROPERTIES = new Properties();
 
     static {
         loadProperties();
-    }
-
-    private PropertiesLoader() {
     }
 
     private static void loadProperties() {

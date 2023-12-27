@@ -1,6 +1,5 @@
 package ru.aston.servlet;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,10 +10,7 @@ import ru.aston.dto.UserDto;
 import ru.aston.service.UserService;
 import ru.aston.service.impl.UserServiceImpl;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -25,6 +21,9 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static ru.aston.TestObjectsBuilder.getReader;
+import static ru.aston.TestObjectsBuilder.getUserDto;
+import static ru.aston.util.ServletUtil.ID;
 
 class UserServletTest {
 
@@ -36,8 +35,6 @@ class UserServletTest {
 
     @BeforeEach
     void setMocks() {
-
-
         req = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
         service = mock(UserServiceImpl.class);
@@ -47,7 +44,7 @@ class UserServletTest {
 
     @Test
     void createUser() throws IOException {
-        String json = getNewUserJson();
+        String json = mapper.writeValueAsString(getUserDto());
         UserDto dto = getUserDto();
         StringWriter writer = new StringWriter();
 
@@ -83,7 +80,7 @@ class UserServletTest {
         StringWriter writer = new StringWriter();
 
         when(req.getQueryString()).thenReturn("id=1");
-        when(req.getParameter("id")).thenReturn("1");
+        when(req.getParameter(ID)).thenReturn("1");
         when(service.findById(anyLong())).thenReturn(dto);
         when(response.getWriter()).thenReturn(new PrintWriter(writer));
 
@@ -111,34 +108,13 @@ class UserServletTest {
     @Test
     void removeUser() throws IOException {
         StringWriter writer = new StringWriter();
-        when(req.getParameter("id")).thenReturn("1");
+        when(req.getParameter(ID)).thenReturn("1");
         when(service.deleteById(anyLong())).thenReturn(true);
         when(response.getWriter()).thenReturn(new PrintWriter(writer));
 
         servlet.doDelete(req, response);
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
-    }
-
-    private BufferedReader getReader(String s) {
-        return new BufferedReader(new InputStreamReader(new ByteArrayInputStream(s.getBytes())));
-    }
-
-    private UserDto getUserDto() {
-        return UserDto.builder()
-                .id(1)
-                .name("TestName")
-                .login("TestLogin")
-                .build();
-    }
-
-    private String getNewUserJson() throws JsonProcessingException {
-        UserDto userDto = UserDto.builder()
-                .name("TestName")
-                .login("TestLogin")
-                .build();
-
-        return mapper.writeValueAsString(userDto);
     }
 
 }

@@ -15,7 +15,7 @@ services:
       - db.password=root
 
   db:
-    image: postgres:13-buster
+    image: postgres:alpine
     container_name: app-db-container
     ports:
       - "5432:5432"
@@ -23,5 +23,3 @@ services:
       - POSTGRES_DB=db
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
-    volumes:
-      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql

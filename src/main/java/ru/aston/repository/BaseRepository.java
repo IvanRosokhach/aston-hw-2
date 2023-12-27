@@ -6,6 +6,8 @@ public interface BaseRepository<T> {
 
     T findById(long id);
 
+    T update(T entity);
+
     boolean deleteById(long id);
 
 }

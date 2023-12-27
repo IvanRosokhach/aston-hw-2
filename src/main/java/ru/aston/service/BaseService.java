@@ -6,6 +6,8 @@ public interface BaseService<T> {
 
     T findById(long id);
 
+    T update(T entity);
+
     boolean deleteById(long id);
 
 }

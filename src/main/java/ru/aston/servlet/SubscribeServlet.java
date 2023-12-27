@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import ru.aston.dto.UserDto;
 import ru.aston.service.SubscriptionService;
 import ru.aston.service.impl.SubscriptionServiceImpl;
@@ -15,10 +16,13 @@ import java.util.List;
 import static jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static jakarta.servlet.http.HttpServletResponse.SC_CREATED;
 import static jakarta.servlet.http.HttpServletResponse.SC_OK;
+import static ru.aston.util.ServletUtil.AUTHOR_ID;
 import static ru.aston.util.ServletUtil.ERROR_PARAMETER_ID;
 import static ru.aston.util.ServletUtil.ERROR_PARAMETER_ID_AND_AUTHOR_ID;
+import static ru.aston.util.ServletUtil.ID;
 import static ru.aston.util.ServletUtil.createResponse;
 
+@AllArgsConstructor
 @WebServlet("/subscription")
 public class SubscribeServlet extends HttpServlet {
 
@@ -30,14 +34,9 @@ public class SubscribeServlet extends HttpServlet {
         this.mapper = new ObjectMapper();
     }
 
-    public SubscribeServlet(SubscriptionService subscribeService, ObjectMapper mapper) {
-        this.subscribeService = subscribeService;
-        this.mapper = mapper;
-    }
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String id = req.getParameter("id");
+        String id = req.getParameter(ID);
         if (id != null) {
             long userId = Long.parseLong(id);
             List<UserDto> subscribers = subscribeService.getSubscribers(userId);
@@ -51,8 +50,8 @@ public class SubscribeServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String id = req.getParameter("id");
-        String id2 = req.getParameter("author-id");
+        String id = req.getParameter(ID);
+        String id2 = req.getParameter(AUTHOR_ID);
         if (id == null || id2 == null) {
             createResponse(resp, ERROR_PARAMETER_ID_AND_AUTHOR_ID, SC_BAD_REQUEST);
         }
@@ -70,8 +69,8 @@ public class SubscribeServlet extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String id = req.getParameter("id");
-        String id2 = req.getParameter("author-id");
+        String id = req.getParameter(ID);
+        String id2 = req.getParameter(AUTHOR_ID);
         if (id == null || id2 == null) {
             createResponse(resp, ERROR_PARAMETER_ID_AND_AUTHOR_ID, SC_BAD_REQUEST);
         }

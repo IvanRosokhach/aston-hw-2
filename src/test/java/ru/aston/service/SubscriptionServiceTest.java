@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static ru.aston.TestObjectsBuilder.getUserDto;
 
 class SubscriptionServiceTest {
 
@@ -51,14 +52,6 @@ class SubscriptionServiceTest {
         when(repository.remove(anyLong(), anyLong())).thenReturn(true);
 
         assertTrue(service.remove(1, 2));
-    }
-
-    private UserDto getUserDto() {
-        return UserDto.builder()
-                .id(1)
-                .name("TestName")
-                .login("TestLogin")
-                .build();
     }
 
 }

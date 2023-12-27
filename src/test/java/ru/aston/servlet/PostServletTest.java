@@ -1,19 +1,16 @@
 package ru.aston.servlet;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import ru.aston.dto.PostDto;
 import ru.aston.service.PostService;
 import ru.aston.service.impl.PostServiceImpl;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -24,6 +21,10 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static ru.aston.TestObjectsBuilder.getPostDto;
+import static ru.aston.TestObjectsBuilder.getReader;
+import static ru.aston.util.ServletUtil.AUTHOR_ID;
+import static ru.aston.util.ServletUtil.ID;
 
 class PostServletTest {
 
@@ -47,8 +48,8 @@ class PostServletTest {
         PostDto dto = getPostDto();
         StringWriter writer = new StringWriter();
 
-        when(req.getParameter("author-id")).thenReturn("1");
-        when(req.getParameter("id")).thenReturn(null);
+        when(req.getParameter(AUTHOR_ID)).thenReturn("1");
+        when(req.getParameter(ID)).thenReturn(null);
         when(service.findByAuthorId(anyLong())).thenReturn(List.of(dto));
         when(response.getWriter()).thenReturn(new PrintWriter(writer));
 
@@ -64,8 +65,8 @@ class PostServletTest {
         PostDto dto = getPostDto();
         StringWriter writer = new StringWriter();
 
-        when(req.getParameter("author-id")).thenReturn(null);
-        when(req.getParameter("id")).thenReturn("1");
+        when(req.getParameter(AUTHOR_ID)).thenReturn(null);
+        when(req.getParameter(ID)).thenReturn("1");
         when(service.findById(anyLong())).thenReturn(dto);
         when(response.getWriter()).thenReturn(new PrintWriter(writer));
 
@@ -78,7 +79,7 @@ class PostServletTest {
 
     @Test
     void doPost() throws IOException {
-        String json = getNewPostJson();
+        String json = mapper.writeValueAsString(getPostDto());
         PostDto dto = getPostDto();
         StringWriter writer = new StringWriter();
 
@@ -96,36 +97,30 @@ class PostServletTest {
     }
 
     @Test
+    void doPut() throws IOException {
+        PostDto dto = getPostDto();
+        StringWriter writer = new StringWriter();
+
+        when(req.getReader()).thenReturn(getReader(mapper.writeValueAsString(dto)));
+        when(service.update(ArgumentMatchers.any(PostDto.class))).thenReturn(dto);
+        when(response.getWriter()).thenReturn(new PrintWriter(writer));
+
+        servlet.doPut(req, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_OK);
+        assertEquals(mapper.writeValueAsString(dto), writer.toString());
+    }
+
+    @Test
     void doDelete() throws IOException {
         StringWriter writer = new StringWriter();
-        when(req.getParameter("id")).thenReturn("1");
+        when(req.getParameter(ID)).thenReturn("1");
         when(service.deleteById(anyLong())).thenReturn(true);
         when(response.getWriter()).thenReturn(new PrintWriter(writer));
 
         servlet.doDelete(req, response);
 
         verify(response).setStatus(HttpServletResponse.SC_OK);
-    }
-
-    private BufferedReader getReader(String s) {
-        return new BufferedReader(new InputStreamReader(new ByteArrayInputStream(s.getBytes())));
-    }
-
-    private PostDto getPostDto() {
-        return PostDto.builder()
-                .id(1)
-                .text("TestText")
-                .authorId(1)
-                .build();
-    }
-
-    private String getNewPostJson() throws JsonProcessingException {
-        PostDto postDto = PostDto.builder()
-                .text("TestText")
-                .authorId(1)
-                .build();
-
-        return mapper.writeValueAsString(postDto);
     }
 
 }

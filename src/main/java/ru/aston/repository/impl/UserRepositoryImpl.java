@@ -1,9 +1,11 @@
 package ru.aston.repository.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.aston.entity.User;
+import ru.aston.exception.CustomSqlException;
 import ru.aston.exception.RepositoryException;
 import ru.aston.repository.UserRepository;
-import ru.aston.util.ConnectionManager;
+import ru.aston.util.ConnectionPool;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,6 +15,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ru.aston.util.RepositoryUtil.LOGIN;
+import static ru.aston.util.RepositoryUtil.NAME;
+import static ru.aston.util.RepositoryUtil.USER_ID;
+
+@Slf4j
 public class UserRepositoryImpl implements UserRepository {
 
     public static final String CREATE_SQL_QUERY = "INSERT INTO users(name, login) VALUES(?, ?);";
@@ -23,7 +30,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User create(User user) {
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = ConnectionPool.getConnection();
              PreparedStatement stmt = connection.prepareStatement(CREATE_SQL_QUERY, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, user.getName());
             stmt.setString(2, user.getLogin());
@@ -39,48 +46,51 @@ public class UserRepositoryImpl implements UserRepository {
             }
             return user;
 
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+        } catch (SQLException e) {
+            log.debug(e.getMessage());
+            throw new CustomSqlException(e.getMessage());
         }
     }
 
     @Override
     public User findById(long userId) {
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = ConnectionPool.getConnection();
              PreparedStatement stmt = connection.prepareStatement(FIND_BY_ID_SQL_QUERY)) {
             stmt.setLong(1, userId);
 
             ResultSet resultSet = stmt.executeQuery();
             if (!resultSet.next()) {
-                throw new RepositoryException("USER NOT FIND");
+                throw new RepositoryException("USER NOT FOUND");
             }
             return map(resultSet);
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            log.debug(e.getMessage());
+            throw new CustomSqlException(e.getMessage());
         }
     }
 
     @Override
     public List<User> findAll() {
-        try (Connection connection = ConnectionManager.getConnection();
+        List<User> users = new ArrayList<>();
+        try (Connection connection = ConnectionPool.getConnection();
              PreparedStatement stmt = connection.prepareStatement(FIND_ALL_SQL_QUERY)) {
 
             ResultSet resultSet = stmt.executeQuery();
-            List<User> users = new ArrayList<>();
             while (resultSet.next()) {
                 users.add(map(resultSet));
             }
-            return users;
 
         } catch (SQLException e) {
-            throw new RuntimeException(e.getMessage());
+            log.debug(e.getMessage());
+            throw new CustomSqlException(e.getMessage());
         }
+        return users;
     }
 
     @Override
     public User update(User user) {
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = ConnectionPool.getConnection();
              PreparedStatement stmt = connection.prepareStatement(UPDATE_SQL_QUERY, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, user.getName());
             stmt.setString(2, user.getLogin());
@@ -98,30 +108,32 @@ public class UserRepositoryImpl implements UserRepository {
             }
             return user;
 
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+        } catch (SQLException e) {
+            log.debug(e.getMessage());
+            throw new CustomSqlException(e.getMessage());
         }
     }
 
     @Override
     public boolean deleteById(long userId) {
-        try (Connection connection = ConnectionManager.getConnection();
+        try (Connection connection = ConnectionPool.getConnection();
              PreparedStatement stmt = connection.prepareStatement(DELETE_SQL_QUERY)) {
             stmt.setLong(1, userId);
 
             int affectedRows = stmt.executeUpdate();
             return affectedRows > 0;
 
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+        } catch (SQLException e) {
+            log.debug(e.getMessage());
+            throw new CustomSqlException(e.getMessage());
         }
     }
 
     private User map(ResultSet resultSet) throws SQLException {
         return User.builder()
-                .id(resultSet.getLong("user_id"))
-                .name(resultSet.getString("name"))
-                .login(resultSet.getString("login"))
+                .id(resultSet.getLong(USER_ID))
+                .name(resultSet.getString(NAME))
+                .login(resultSet.getString(LOGIN))
                 .build();
     }
 

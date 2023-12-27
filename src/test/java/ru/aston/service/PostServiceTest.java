@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static ru.aston.TestObjectsBuilder.getPostDto;
 
 class PostServiceTest {
 
@@ -64,18 +65,20 @@ class PostServiceTest {
     }
 
     @Test
+    void update() {
+        PostDto dto = getPostDto();
+        Post post = mapper.fromDto(dto);
+
+        when(repository.update(any(Post.class))).thenReturn(post);
+
+        assertEquals(mapper.toDto(post), service.update(dto));
+    }
+
+    @Test
     void deleteById() {
         when(repository.deleteById(anyLong())).thenReturn(true);
 
         assertTrue(service.deleteById(1));
-    }
-
-    private PostDto getPostDto() {
-        return PostDto.builder()
-                .id(1)
-                .text("TestText")
-                .authorId(1)
-                .build();
     }
 
 }
