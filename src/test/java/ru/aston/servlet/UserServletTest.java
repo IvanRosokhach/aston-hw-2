@@ -1,0 +1,120 @@
+package ru.aston.servlet;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import ru.aston.dto.UserDto;
+import ru.aston.service.UserService;
+import ru.aston.service.impl.UserServiceImpl;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static ru.aston.TestObjectsBuilder.getReader;
+import static ru.aston.TestObjectsBuilder.getUserDto;
+import static ru.aston.util.ServletUtil.ID;
+
+class UserServletTest {
+
+    private HttpServletRequest req;
+    private HttpServletResponse response;
+    private UserServlet servlet;
+    private UserService service;
+    private ObjectMapper mapper;
+
+    @BeforeEach
+    void setMocks() {
+        req = mock(HttpServletRequest.class);
+        response = mock(HttpServletResponse.class);
+        service = mock(UserServiceImpl.class);
+        mapper = new ObjectMapper();
+        servlet = new UserServlet(service, mapper);
+    }
+
+    @Test
+    void createUser() throws IOException {
+        String json = mapper.writeValueAsString(getUserDto());
+        UserDto dto = getUserDto();
+        StringWriter writer = new StringWriter();
+
+        when(req.getReader()).thenReturn(getReader(json));
+        when(service.create(any(UserDto.class))).thenReturn(dto);
+        when(response.getWriter()).thenReturn(new PrintWriter(writer));
+
+        servlet.doPost(req, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_CREATED);
+        verify(service).create(mapper.readValue(json, UserDto.class));
+        assertEquals(mapper.writeValueAsString(dto), writer.toString());
+    }
+
+    @Test
+    void getAllUsers() throws IOException {
+        UserDto dto = getUserDto();
+        StringWriter writer = new StringWriter();
+
+        when(req.getQueryString()).thenReturn(null);
+        when(service.findAll()).thenReturn(List.of(dto));
+        when(response.getWriter()).thenReturn(new PrintWriter(writer));
+
+        servlet.doGet(req, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_OK);
+        assertEquals(mapper.writeValueAsString(List.of(dto)), writer.toString());
+    }
+
+    @Test
+    void getUserById() throws IOException {
+        UserDto dto = getUserDto();
+        StringWriter writer = new StringWriter();
+
+        when(req.getQueryString()).thenReturn("id=1");
+        when(req.getParameter(ID)).thenReturn("1");
+        when(service.findById(anyLong())).thenReturn(dto);
+        when(response.getWriter()).thenReturn(new PrintWriter(writer));
+
+        servlet.doGet(req, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_OK);
+        assertEquals(mapper.writeValueAsString(dto), writer.toString());
+    }
+
+    @Test
+    void updateUser() throws IOException {
+        UserDto dto = getUserDto();
+        StringWriter writer = new StringWriter();
+
+        when(req.getReader()).thenReturn(getReader(mapper.writeValueAsString(dto)));
+        when(service.update(ArgumentMatchers.any(UserDto.class))).thenReturn(dto);
+        when(response.getWriter()).thenReturn(new PrintWriter(writer));
+
+        servlet.doPut(req, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_OK);
+        assertEquals(mapper.writeValueAsString(dto), writer.toString());
+    }
+
+    @Test
+    void removeUser() throws IOException {
+        StringWriter writer = new StringWriter();
+        when(req.getParameter(ID)).thenReturn("1");
+        when(service.deleteById(anyLong())).thenReturn(true);
+        when(response.getWriter()).thenReturn(new PrintWriter(writer));
+
+        servlet.doDelete(req, response);
+
+        verify(response).setStatus(HttpServletResponse.SC_OK);
+    }
+
+}
