@@ -18,6 +18,8 @@ import static jakarta.servlet.http.HttpServletResponse.SC_CREATED;
 import static jakarta.servlet.http.HttpServletResponse.SC_OK;
 import static ru.aston.util.ServletUtil.ERROR_PARAMETER_ID;
 import static ru.aston.util.ServletUtil.ID;
+import static ru.aston.util.ServletUtil.USER_FOR_DELETE_NOT_FOUND;
+import static ru.aston.util.ServletUtil.USER_SUCCESSFULLY_DELETED;
 import static ru.aston.util.ServletUtil.createResponse;
 
 @AllArgsConstructor
@@ -83,9 +85,9 @@ public class UserServlet extends HttpServlet {
 
         long userId = Long.parseLong(id);
         if (userService.deleteById(userId)) {
-            createResponse(resp, "User successfully deleted.", SC_OK);
+            createResponse(resp, USER_SUCCESSFULLY_DELETED, SC_OK);
         } else {
-            createResponse(resp, "User for delete not found.", SC_BAD_REQUEST);
+            createResponse(resp, USER_FOR_DELETE_NOT_FOUND, SC_BAD_REQUEST);
         }
     }
 

@@ -22,23 +22,23 @@ CREATE TABLE IF NOT EXISTS posts (
     CONSTRAINT fk_posts_author_id FOREIGN KEY (author_id) REFERENCES users (user_id) ON delete CASCADE
 );
 
---INSERT INTO users (name, login)
---VALUES ('Tom', '1'),
---       ('Ben', '2'),
---       ('Mike', '3'),
---       ('Rob', '4');
---
---INSERT INTO posts (text, author_id)
---VALUES ('qwe', 1),
---       ('asd', 1),
---       ('zxc', 3),
---       ('cxz', 3);
---
---INSERT INTO subscriptions (user_id1, user_id2)
---VALUES (1, 2),
---       (1, 3),
---       (2, 1),
---       (2, 4),
---       (3, 1),
---       (3, 2),
---       (3, 4);
+INSERT INTO users (name, login)
+VALUES ('Tom', '1'),
+       ('Ben', '2'),
+       ('Mike', '3'),
+       ('Rob', '4');
+
+INSERT INTO posts (text, author_id)
+VALUES ('qwe', 1),
+       ('asd', 1),
+       ('zxc', 3),
+       ('cxz', 3);
+
+INSERT INTO subscriptions (user_id1, user_id2)
+VALUES (1, 2),
+       (1, 3),
+       (2, 1),
+       (2, 4),
+       (3, 1),
+       (3, 2),
+       (3, 4);

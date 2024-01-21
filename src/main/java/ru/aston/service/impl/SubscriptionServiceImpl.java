@@ -24,7 +24,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public List<UserDto> getSubscribers(long userId) {
         List<User> subscribers = subscriptionRepository.getSubscribers(userId);
-        return subscribers.stream().map(mapper::toDto).toList();
+        return subscribers.stream()
+                .map(mapper::toDto)
+                .toList();
     }
 
     @Override
