@@ -36,7 +36,9 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<PostDto> findByAuthorId(long authorId) {
         List<Post> posts = postRepository.findByAuthorId(authorId);
-        return posts.stream().map(mapper::toDto).toList();
+        return posts.stream()
+                .map(mapper::toDto)
+                .toList();
     }
 
     @Override

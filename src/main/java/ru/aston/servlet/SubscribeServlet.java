@@ -19,7 +19,11 @@ import static jakarta.servlet.http.HttpServletResponse.SC_OK;
 import static ru.aston.util.ServletUtil.AUTHOR_ID;
 import static ru.aston.util.ServletUtil.ERROR_PARAMETER_ID;
 import static ru.aston.util.ServletUtil.ERROR_PARAMETER_ID_AND_AUTHOR_ID;
+import static ru.aston.util.ServletUtil.FAILED_TO_SUBSCRIBE_TO_THE_AUTHOR;
+import static ru.aston.util.ServletUtil.FAILED_TO_UNSUBSCRIBE_FROM_THE_AUTHOR;
 import static ru.aston.util.ServletUtil.ID;
+import static ru.aston.util.ServletUtil.SUBSCRIBED_TO_THE_AUTHOR;
+import static ru.aston.util.ServletUtil.UNSUBSCRIBED_FROM_THE_AUTHOR;
 import static ru.aston.util.ServletUtil.createResponse;
 
 @AllArgsConstructor
@@ -60,9 +64,9 @@ public class SubscribeServlet extends HttpServlet {
         long authorId = Long.parseLong(id2);
 
         if (subscribeService.add(userId, authorId)) {
-            createResponse(resp, "Subscribed to the author.", SC_CREATED);
+            createResponse(resp, SUBSCRIBED_TO_THE_AUTHOR, SC_CREATED);
         } else {
-            createResponse(resp, "Failed to subscribe to the author.", SC_BAD_REQUEST);
+            createResponse(resp, FAILED_TO_SUBSCRIBE_TO_THE_AUTHOR, SC_BAD_REQUEST);
         }
 
     }
@@ -79,9 +83,9 @@ public class SubscribeServlet extends HttpServlet {
         long authorId = Long.parseLong(id2);
 
         if (subscribeService.remove(userId, authorId)) {
-            createResponse(resp, "Unsubscribed from the author.", SC_OK);
+            createResponse(resp, UNSUBSCRIBED_FROM_THE_AUTHOR, SC_OK);
         } else {
-            createResponse(resp, "Failed to unsubscribe from the author.", SC_BAD_REQUEST);
+            createResponse(resp, FAILED_TO_UNSUBSCRIBE_FROM_THE_AUTHOR, SC_BAD_REQUEST);
         }
     }
 

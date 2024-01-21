@@ -20,6 +20,8 @@ import static ru.aston.util.ServletUtil.AUTHOR_ID;
 import static ru.aston.util.ServletUtil.ERROR_PARAMETER_ID;
 import static ru.aston.util.ServletUtil.ERROR_PARAMETER_ID_OR_AUTHOR_ID;
 import static ru.aston.util.ServletUtil.ID;
+import static ru.aston.util.ServletUtil.POST_FOR_DELETE_NOT_FOUND;
+import static ru.aston.util.ServletUtil.POST_SUCCESSFULLY_DELETED;
 import static ru.aston.util.ServletUtil.createResponse;
 
 @AllArgsConstructor
@@ -86,9 +88,9 @@ public class PostServlet extends HttpServlet {
 
         long postId = Long.parseLong(id);
         if (postService.deleteById(postId)) {
-            createResponse(resp, "Post successfully deleted.", SC_OK);
+            createResponse(resp, POST_SUCCESSFULLY_DELETED, SC_OK);
         } else {
-            createResponse(resp, "Post for delete not found.", SC_BAD_REQUEST);
+            createResponse(resp, POST_FOR_DELETE_NOT_FOUND, SC_BAD_REQUEST);
         }
     }
 
